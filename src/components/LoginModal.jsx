@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL || 'https://xarajat-backend.vercel.app/api';
 
 export default function LoginModal({ onClose }) {
   const { login } = useAuth();

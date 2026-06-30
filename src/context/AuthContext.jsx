@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL || 'https://xarajat-backend.vercel.app/api';
 
 function ensureGuestId() {
   let id = localStorage.getItem('guestId');
