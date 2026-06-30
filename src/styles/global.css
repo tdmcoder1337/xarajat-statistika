@@ -620,16 +620,28 @@ body {
 .tx-amount.income { color: var(--income); }
 .tx-amount.expense { color: var(--expense); }
 
+.tx-edit,
 .tx-delete {
   background: none;
   border: none;
-  color: #cbd5e1;
   font-size: 16px;
   cursor: pointer;
-  padding: 4px;
+  padding: 4px 5px;
   flex-shrink: 0;
   border-radius: 4px;
   line-height: 1;
+}
+
+.tx-edit {
+  color: #93c5fd;
+}
+
+.tx-edit:active {
+  color: var(--primary);
+}
+
+.tx-delete {
+  color: #cbd5e1;
 }
 
 .tx-delete:active {
@@ -1097,6 +1109,24 @@ tr:last-child td {
 .mobile-user-btn.active {
   background: var(--primary);
   color: #fff;
+}
+
+/* ========================
+   SUMMARY INLINE (Tarix sahifasi)
+======================== */
+.summary-inline {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 14px;
+  background: var(--bg);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.summary-inline-item {
+  text-align: center;
 }
 
 /* ========================
