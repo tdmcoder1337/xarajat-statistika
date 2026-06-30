@@ -20,8 +20,8 @@ export default function AddTransactionForm({ defaultDate, onAdded }) {
       await createTransaction({ ...form, type });
       setForm({ amount: '', description: '', date: today });
       onAdded();
-    } catch {
-      setError('Saqlashda xatolik');
+    } catch (err) {
+      setError(err.response?.data?.error || err.message || 'Saqlashda xatolik');
     }
     setLoading(false);
   };
