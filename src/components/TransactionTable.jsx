@@ -130,16 +130,14 @@ export default function TransactionTable({ transactions, onDeleted, onEdited }) 
             <button
               className="tx-edit"
               onClick={() => setEditing(t)}
-              title="Tahrirlash"
             >
-              ✎
+              Tahrir
             </button>
             <button
               className="tx-delete"
               onClick={() => handleDelete(t._id || t.id)}
-              title="O'chirish"
             >
-              ×
+              O'chir
             </button>
           </div>
         ))}

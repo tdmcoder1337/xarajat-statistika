@@ -623,18 +623,19 @@ body {
 .tx-edit,
 .tx-delete {
   border: none;
-  font-size: 15px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  padding: 6px 8px;
+  padding: 7px 12px;
   flex-shrink: 0;
-  border-radius: 7px;
+  border-radius: 8px;
   line-height: 1;
   transition: background 0.15s, color 0.15s;
 }
 
 .tx-edit {
-  background: #eff6ff;
-  color: var(--primary);
+  background: #dbeafe;
+  color: #1d4ed8;
 }
 
 .tx-edit:active {
@@ -644,7 +645,7 @@ body {
 
 .tx-delete {
   background: #fee2e2;
-  color: var(--expense);
+  color: #b91c1c;
 }
 
 .tx-delete:active {
