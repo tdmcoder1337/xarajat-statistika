@@ -622,30 +622,46 @@ body {
 
 .tx-edit,
 .tx-delete {
-  background: none;
   border: none;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
-  padding: 4px 5px;
+  padding: 6px 8px;
   flex-shrink: 0;
-  border-radius: 4px;
+  border-radius: 7px;
   line-height: 1;
+  transition: background 0.15s, color 0.15s;
 }
 
 .tx-edit {
-  color: #93c5fd;
-}
-
-.tx-edit:active {
+  background: #eff6ff;
   color: var(--primary);
 }
 
+.tx-edit:active {
+  background: var(--primary);
+  color: #fff;
+}
+
 .tx-delete {
-  color: #cbd5e1;
+  background: #fee2e2;
+  color: var(--expense);
 }
 
 .tx-delete:active {
-  color: var(--expense);
+  background: var(--expense);
+  color: #fff;
+}
+
+@media (min-width: 768px) {
+  .tx-edit:hover {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .tx-delete:hover {
+    background: var(--expense);
+    color: #fff;
+  }
 }
 
 /* Fallback table for wider screens */
