@@ -15,6 +15,7 @@ function ensureGuestId() {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [isGuest, setIsGuest] = useState(() => localStorage.getItem('isGuest') === 'true');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,16 +37,25 @@ export function AuthProvider({ children }) {
 
   const login = (token, userData) => {
     localStorage.setItem('token', token);
+    localStorage.removeItem('isGuest');
+    setIsGuest(false);
     setUser(userData);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('isGuest');
+    setIsGuest(false);
     setUser(null);
   };
 
+  const continueAsGuest = () => {
+    localStorage.setItem('isGuest', 'true');
+    setIsGuest(true);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, isGuest, loading, login, logout, continueAsGuest }}>
       {children}
     </AuthContext.Provider>
   );

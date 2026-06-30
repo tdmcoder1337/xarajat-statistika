@@ -1100,6 +1100,68 @@ tr:last-child td {
 }
 
 /* ========================
+   TOP STATS BAR
+======================== */
+.top-stats-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 540px) {
+  .top-stats-bar {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .top-stats-bar {
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+}
+
+.top-stat-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+@media (min-width: 768px) {
+  .top-stat-card {
+    padding: 18px 20px;
+  }
+}
+
+.top-stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.top-stat-value {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  .top-stat-value {
+    font-size: 20px;
+  }
+}
+
+.top-stat-value.income { color: var(--income); }
+.top-stat-value.expense { color: var(--expense); }
+.top-stat-value.net { color: var(--primary); }
+
+/* ========================
    LOADING SCREEN
 ======================== */
 .loading-screen {

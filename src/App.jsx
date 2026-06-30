@@ -1,14 +1,16 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Sidebar from './components/Sidebar';
+import TopStatsBar from './components/TopStatsBar';
 import DailyPage from './pages/DailyPage';
 import MonthlyPage from './pages/MonthlyPage';
 import EssentialsPage from './pages/EssentialsPage';
 import TransactionsPage from './pages/TransactionsPage';
+import LoginPage from './pages/LoginPage';
 import './styles/global.css';
 
 function AppContent() {
-  const { loading } = useAuth();
+  const { user, isGuest, loading } = useAuth();
 
   if (loading) {
     return (
@@ -18,11 +20,16 @@ function AppContent() {
     );
   }
 
+  if (!user && !isGuest) {
+    return <LoginPage />;
+  }
+
   return (
     <BrowserRouter>
       <div className="layout">
         <Sidebar />
         <main className="main-content">
+          <TopStatsBar />
           <Routes>
             <Route path="/" element={<DailyPage />} />
             <Route path="/monthly" element={<MonthlyPage />} />
