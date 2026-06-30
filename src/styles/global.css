@@ -347,12 +347,19 @@ body {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
+  align-items: start;
 }
 
 @media (min-width: 768px) {
   .grid-2 {
     grid-template-columns: 1fr 1fr;
     gap: 20px;
+  }
+
+  /* Yangi yozuv qo'shish formasi ro'yxat o'sganda ham yuqorida turadi */
+  .grid-2 > .card:first-child {
+    position: sticky;
+    top: 16px;
   }
 }
 
@@ -543,6 +550,18 @@ body {
 .tx-list {
   display: flex;
   flex-direction: column;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.tx-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tx-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
 }
 
 .tx-item {
