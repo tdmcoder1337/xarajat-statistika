@@ -1,70 +1,94 @@
 import { useState, useEffect } from 'react';
-import { getEssentials, createEssential, updateEssential, deleteEssential, getDailySummary } from '../services/api';
+import { getEssentials, createEssential, updateEssential, deleteEssential, getMonthlySummary } from '../services/api';
+
+function formatAmount(val) {
+  const digits = String(val).replace(/\D/g, '');
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
+function fmt(n) {
+  return Number(n).toLocaleString('uz-UZ') + " so'm";
+}
 
 export default function EssentialsPage() {
   const [essentials, setEssentials] = useState([]);
-  const [dailyIncome, setDailyIncome] = useState(0);
+  const [monthlyIncome, setMonthlyIncome] = useState('');
   const [form, setForm] = useState({ name: '', amount: '' });
   const [editId, setEditId] = useState(null);
   const [editForm, setEditForm] = useState({ name: '', amount: '' });
   const [error, setError] = useState('');
 
-  const today = new Date().toISOString().split('T')[0];
-
   const load = async () => {
-    const [e, d] = await Promise.all([
+    const now = new Date();
+    const [e, m] = await Promise.all([
       getEssentials(),
-      getDailySummary(today),
+      getMonthlySummary(now.getMonth() + 1, now.getFullYear()),
     ]);
     setEssentials(e.data);
-    setDailyIncome(d.data.income);
+    // Agar foydalanuvchi o'zi kiritmagan bo'lsa, haqiqiy oylik daromadni qo'yamiz
+    if (!monthlyIncome) {
+      const income = m.data.income || 0;
+      if (income > 0) setMonthlyIncome(formatAmount(String(income)));
+    }
   };
 
   useEffect(() => { load(); }, []);
 
   const totalEssential = essentials.reduce((s, e) => s + e.amount, 0);
+  const rawIncome = Number(monthlyIncome.replace(/\s/g, '')) || 0;
+  const remaining = rawIncome - totalEssential;
+  const coverPercent = rawIncome > 0 ? Math.min(100, Math.round((totalEssential / rawIncome) * 100)) : 0;
+
+  // Bir oyda qancha yig'ish mumkin (daromad - muhim xarajatlar)
+  const monthlySavings = remaining > 0 ? remaining : 0;
+
+  const getMonthsToSave = (amount) => {
+    if (!monthlySavings || monthlySavings <= 0) return null;
+    const months = amount / monthlySavings;
+    if (months < 1) return `${Math.ceil(months * 30)} kun`;
+    return `${months.toFixed(1)} oy`;
+  };
 
   const handleAdd = async (e) => {
     e.preventDefault();
     if (!form.name || !form.amount) { setError('Nom va miqdorni kiriting'); return; }
     setError('');
-    await createEssential({ name: form.name, amount: parseFloat(form.amount) });
+    await createEssential({ name: form.name, amount: Number(form.amount.replace(/\s/g, '')) });
     setForm({ name: '', amount: '' });
     load();
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('O\'chirishni tasdiqlaysizmi?')) return;
+    if (!window.confirm("O'chirishni tasdiqlaysizmi?")) return;
     await deleteEssential(id);
     load();
   };
 
   const startEdit = (item) => {
     setEditId(item._id || item.id);
-    setEditForm({ name: item.name, amount: item.amount });
+    setEditForm({ name: item.name, amount: formatAmount(String(item.amount)) });
   };
 
   const handleUpdate = async (id) => {
-    await updateEssential(id, { name: editForm.name, amount: parseFloat(editForm.amount) });
+    await updateEssential(id, {
+      name: editForm.name,
+      amount: Number(editForm.amount.replace(/\s/g, '')),
+    });
     setEditId(null);
     load();
-  };
-
-  const getSavingsDays = (amount) => {
-    if (!dailyIncome || dailyIncome <= 0) return null;
-    return Math.ceil(amount / dailyIncome);
   };
 
   return (
     <div>
       <div className="page-title">
-        ⭐ Muhim Xarajatlar
+        Muhim Xarajatlar
         <div className="page-subtitle">
-          Zaruriy xarajatlaringizni kiriting — bugungi daromad asosida yig'ish hisoblanadi
+          Oylik daromadingizga qarab muhim xarajatlar uchun yig'ish hisoblanadi
         </div>
       </div>
 
       <div className="grid-2">
+        {/* Chap: qo'shish + daromad */}
         <div className="card">
           <div className="section-title" style={{ marginBottom: 14 }}>Yangi Muhim Xarajat</div>
           {error && <div className="alert alert-error">{error}</div>}
@@ -82,70 +106,112 @@ export default function EssentialsPage() {
               <label>Oylik miqdor (so'm)</label>
               <input
                 className="form-control"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 placeholder="0"
                 value={form.amount}
-                onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                min="0"
-                inputMode="numeric"
+                onChange={(e) => setForm({ ...form, amount: formatAmount(e.target.value) })}
               />
             </div>
             <button className="btn btn-primary" type="submit" style={{ width: '100%' }}>
-              ⭐ Qo'shish
+              Qo'shish
             </button>
           </form>
 
-          <div className="savings-box" style={{ marginTop: 16 }}>
-            <div className="savings-box-title">💡 Bugungi daromad asosi</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--income)' }}>
-              {dailyIncome.toLocaleString('uz-UZ')} so'm
+          <div style={{ marginTop: 20, borderTop: '1px solid #e2e8f0', paddingTop: 16 }}>
+            <div className="section-title" style={{ marginBottom: 10, fontSize: 14 }}>
+              Oylik daromadingiz
             </div>
+            <input
+              className="form-control"
+              type="text"
+              inputMode="numeric"
+              placeholder="Oylik daromadingizni kiriting..."
+              value={monthlyIncome}
+              onChange={(e) => setMonthlyIncome(formatAmount(e.target.value))}
+            />
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
-              Bugun kiritilgan daromad asosida yig'ish hisoblanadi
+              Bu oyda kiritilgan daromad asosida avtomatik to'ldiriladi
             </div>
           </div>
         </div>
 
+        {/* O'ng: hisob-kitob */}
         <div className="card">
-          <div className="section-title" style={{ marginBottom: 14 }}>📊 Umumiy Ko'rsatkichlar</div>
+          <div className="section-title" style={{ marginBottom: 14 }}>Hisob-kitob</div>
 
-          <div style={{ marginBottom: 16 }}>
-            <div className="card-title">Jami muhim xarajatlar (oyiga)</div>
-            <div className="card-value expense">{totalEssential.toLocaleString('uz-UZ')} so'm</div>
-          </div>
-
-          {dailyIncome > 0 && (
+          {rawIncome > 0 ? (
             <>
-              <div style={{ marginBottom: 10 }}>
-                <div className="card-title">Jami yig'ish uchun</div>
-                <div className="card-value net" style={{ fontSize: 20 }}>
-                  {getSavingsDays(totalEssential)} kun
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>Oylik daromad</span>
+                  <strong style={{ color: 'var(--income)' }}>{fmt(rawIncome)}</strong>
                 </div>
-              </div>
-              <div className="savings-box">
-                <div className="savings-box-title">📅 Oylik hisob</div>
-                <div className="savings-progress">
-                  <span>30 kun × {dailyIncome.toLocaleString('uz-UZ')} so'm</span>
-                  <strong>= {(dailyIncome * 30).toLocaleString('uz-UZ')} so'm</strong>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>Jami muhim xarajat</span>
+                  <strong style={{ color: 'var(--expense)' }}>− {fmt(totalEssential)}</strong>
                 </div>
-                <div className="savings-progress" style={{ marginTop: 4 }}>
-                  <span>Xarajatlardan keyin:</span>
-                  <strong style={{ color: (dailyIncome * 30 - totalEssential) >= 0 ? 'var(--income)' : 'var(--expense)' }}>
-                    {(dailyIncome * 30 - totalEssential).toLocaleString('uz-UZ')} so'm
+
+                {/* Progress bar */}
+                <div>
+                  <div style={{ height: 8, background: '#e2e8f0', borderRadius: 4, overflow: 'hidden' }}>
+                    <div style={{
+                      height: '100%',
+                      width: `${coverPercent}%`,
+                      background: coverPercent >= 100 ? 'var(--expense)' : coverPercent > 70 ? '#f59e0b' : 'var(--income)',
+                      borderRadius: 4,
+                      transition: 'width 0.3s',
+                    }} />
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
+                    Daromadning {coverPercent}% muhim xarajatlarga ketadi
+                  </div>
+                </div>
+
+                <div style={{
+                  borderTop: '1px solid #e2e8f0',
+                  paddingTop: 10,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}>
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>Qolgan (yig'ish uchun)</span>
+                  <strong style={{
+                    fontSize: 18,
+                    color: remaining >= 0 ? 'var(--income)' : 'var(--expense)',
+                  }}>
+                    {fmt(remaining)}
                   </strong>
                 </div>
+
+                {remaining <= 0 && (
+                  <div className="alert alert-error" style={{ fontSize: 12, margin: 0 }}>
+                    Daromad muhim xarajatlarni qoplamayapti! Oyiga kamida {fmt(totalEssential)} topish kerak.
+                  </div>
+                )}
+
+                {remaining > 0 && (
+                  <div style={{
+                    background: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: 8,
+                    padding: '10px 14px',
+                    fontSize: 13,
+                  }}>
+                    Har oyda <strong style={{ color: 'var(--income)' }}>{fmt(monthlySavings)}</strong> yig'ish mumkin
+                  </div>
+                )}
               </div>
             </>
-          )}
-
-          {!dailyIncome && (
-            <div className="empty-state" style={{ padding: 16 }}>
-              Bugun daromad kiriting — yig'ish hisob-kitobi paydo bo'ladi
+          ) : (
+            <div className="empty-state" style={{ padding: 24 }}>
+              Oylik daromadingizni kiriting — hisob-kitob paydo bo'ladi
             </div>
           )}
         </div>
       </div>
 
+      {/* Ro'yxat */}
       <div className="card" style={{ marginTop: 14 }}>
         <div className="section-header">
           <span className="section-title">Muhim Xarajatlar Ro'yxati</span>
@@ -158,6 +224,7 @@ export default function EssentialsPage() {
 
         {essentials.map((item) => {
           const itemId = item._id || item.id;
+          const saveTime = getMonthsToSave(item.amount);
           return (
             <div key={itemId} className="essential-item">
               {editId === itemId ? (
@@ -170,11 +237,11 @@ export default function EssentialsPage() {
                   />
                   <input
                     className="form-control"
-                    type="number"
-                    value={editForm.amount}
-                    onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })}
-                    style={{ flex: '1 1 80px' }}
+                    type="text"
                     inputMode="numeric"
+                    value={editForm.amount}
+                    onChange={(e) => setEditForm({ ...editForm, amount: formatAmount(e.target.value) })}
+                    style={{ flex: '1 1 80px' }}
                   />
                   <div style={{ display: 'flex', gap: 6 }}>
                     <button className="btn btn-sm btn-income" onClick={() => handleUpdate(itemId)}>✓</button>
@@ -185,14 +252,14 @@ export default function EssentialsPage() {
                 <>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div className="essential-name">{item.name}</div>
-                    {dailyIncome > 0 && (
+                    {saveTime && (
                       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                        Yig'ish: <strong>{getSavingsDays(item.amount)} kun</strong>
+                        Yig'ish muddati: <strong style={{ color: 'var(--text)' }}>{saveTime}</strong>
                       </div>
                     )}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                    <div className="essential-amount">{item.amount.toLocaleString('uz-UZ')} so'm</div>
+                    <div className="essential-amount">{fmt(item.amount)}</div>
                     <div className="essential-actions">
                       <button className="btn btn-sm btn-edit" onClick={() => startEdit(item)}>✏️</button>
                       <button className="btn btn-sm btn-danger" onClick={() => handleDelete(itemId)}>🗑</button>
