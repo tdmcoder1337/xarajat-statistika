@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { deleteTransaction, updateTransaction } from '../services/api';
+import { useRefresh } from '../context/RefreshContext';
 
 function EditModal({ tx, onClose, onSaved }) {
   const [type, setType] = useState(tx.type);
@@ -100,11 +101,18 @@ function EditModal({ tx, onClose, onSaved }) {
 
 export default function TransactionTable({ transactions, onDeleted, onEdited }) {
   const [editing, setEditing] = useState(null);
+  const { refresh } = useRefresh();
 
   const handleDelete = async (id) => {
     if (!window.confirm("Bu yozuvni o'chirmoqchimisiz?")) return;
     await deleteTransaction(id);
+    refresh();
     onDeleted();
+  };
+
+  const handleSaved = () => {
+    refresh();
+    if (onEdited) onEdited();
   };
 
   if (!transactions.length) {
@@ -147,7 +155,7 @@ export default function TransactionTable({ transactions, onDeleted, onEdited }) 
         <EditModal
           tx={editing}
           onClose={() => setEditing(null)}
-          onSaved={onEdited}
+          onSaved={handleSaved}
         />
       )}
     </>

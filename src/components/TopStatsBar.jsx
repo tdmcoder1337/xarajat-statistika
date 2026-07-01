@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getDailySummary, getMonthlySummary } from '../services/api';
+import { useRefresh } from '../context/RefreshContext';
 
 function StatCard({ label, value, type }) {
   const fmt = (n) => (typeof n === 'number' ? n.toLocaleString('uz-UZ') + " so'm" : '—');
@@ -16,13 +17,14 @@ export default function TopStatsBar() {
   const now = new Date();
   const [daily, setDaily] = useState({ income: 0, expense: 0, net: 0 });
   const [monthly, setMonthly] = useState({ income: 0, expense: 0 });
+  const { key } = useRefresh();
 
   useEffect(() => {
     getDailySummary(today).then((r) => setDaily(r.data)).catch(() => {});
     getMonthlySummary(now.getMonth() + 1, now.getFullYear())
       .then((r) => setMonthly(r.data))
       .catch(() => {});
-  }, []);
+  }, [key]);
 
   return (
     <div className="top-stats-bar">

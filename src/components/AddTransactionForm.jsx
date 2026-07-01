@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createTransaction } from '../services/api';
+import { useRefresh } from '../context/RefreshContext';
 
 export default function AddTransactionForm({ defaultDate, onAdded }) {
   const today = defaultDate || new Date().toISOString().split('T')[0];
@@ -7,6 +8,7 @@ export default function AddTransactionForm({ defaultDate, onAdded }) {
   const [form, setForm] = useState({ amount: '', description: '', date: today });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { refresh } = useRefresh();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,6 +21,7 @@ export default function AddTransactionForm({ defaultDate, onAdded }) {
     try {
       await createTransaction({ ...form, type });
       setForm({ amount: '', description: '', date: today });
+      refresh();
       onAdded();
     } catch (err) {
       setError(err.response?.data?.error || err.message || 'Saqlashda xatolik');
