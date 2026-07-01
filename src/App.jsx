@@ -32,9 +32,9 @@ function AppContent() {
           <TopStatsBar />
           <Routes>
             <Route path="/" element={<DailyPage />} />
-            <Route path="/monthly" element={<MonthlyPage />} />
-            <Route path="/essentials" element={<EssentialsPage />} />
-            <Route path="/transactions" element={<TransactionsPage />} />
+            <Route path="/oylik" element={<MonthlyPage />} />
+            <Route path="/muhim" element={<EssentialsPage />} />
+            <Route path="/tarix" element={<TransactionsPage />} />
           </Routes>
         </main>
       </div>

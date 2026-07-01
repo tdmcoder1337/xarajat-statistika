@@ -5,9 +5,9 @@ import LoginModal from './LoginModal';
 
 const navItems = [
   { path: '/', label: 'Bugun', icon: '📅', shortLabel: 'Bugun' },
-  { path: '/monthly', label: 'Oylik', icon: '📊', shortLabel: 'Oylik' },
-  { path: '/essentials', label: 'Muhim', icon: '⭐', shortLabel: 'Muhim' },
-  { path: '/transactions', label: 'Tarix', icon: '📋', shortLabel: 'Tarix' },
+  { path: '/oylik', label: 'Oylik', icon: '📊', shortLabel: 'Oylik' },
+  { path: '/muhim', label: 'Muhim', icon: '⭐', shortLabel: 'Muhim' },
+  { path: '/tarix', label: 'Tarix', icon: '📋', shortLabel: 'Tarix' },
 ];
 
 export default function Sidebar() {
