@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { RefreshProvider } from './context/RefreshContext';
 import Sidebar from './components/Sidebar';
 import TopStatsBar from './components/TopStatsBar';
 import DailyPage from './pages/DailyPage';
@@ -26,22 +25,20 @@ function AppContent() {
   }
 
   return (
-    <RefreshProvider>
-      <BrowserRouter>
-        <div className="layout">
-          <Sidebar />
-          <main className="main-content">
-            <TopStatsBar />
-            <Routes>
-              <Route path="/" element={<DailyPage />} />
-              <Route path="/monthly" element={<MonthlyPage />} />
-              <Route path="/essentials" element={<EssentialsPage />} />
-              <Route path="/transactions" element={<TransactionsPage />} />
-            </Routes>
-          </main>
-        </div>
-      </BrowserRouter>
-    </RefreshProvider>
+    <BrowserRouter>
+      <div className="layout">
+        <Sidebar />
+        <main className="main-content">
+          <TopStatsBar />
+          <Routes>
+            <Route path="/" element={<DailyPage />} />
+            <Route path="/monthly" element={<MonthlyPage />} />
+            <Route path="/essentials" element={<EssentialsPage />} />
+            <Route path="/transactions" element={<TransactionsPage />} />
+          </Routes>
+        </main>
+      </div>
+    </BrowserRouter>
   );
 }
 

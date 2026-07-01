@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { deleteTransaction, updateTransaction } from '../services/api';
-import { useRefresh } from '../context/RefreshContext';
 
 function EditModal({ tx, onClose, onSaved }) {
   const [type, setType] = useState(tx.type);
@@ -21,7 +20,9 @@ function EditModal({ tx, onClose, onSaved }) {
     setLoading(true);
     try {
       await updateTransaction(tx._id || tx.id, { ...form, type });
-      onSaved(tx, { ...form, type });
+      window.dispatchEvent(new Event('stats-refresh'));
+      onSaved();
+      onClose();
     } catch (err) {
       setError(err.response?.data?.error || 'Saqlashda xatolik');
     }
@@ -100,18 +101,12 @@ function EditModal({ tx, onClose, onSaved }) {
 
 export default function TransactionTable({ transactions, onDeleted, onEdited }) {
   const [editing, setEditing] = useState(null);
-  const { refresh } = useRefresh();
 
-  const handleDelete = async (tx) => {
+  const handleDelete = async (id) => {
     if (!window.confirm("Bu yozuvni o'chirmoqchimisiz?")) return;
-    await deleteTransaction(tx._id || tx.id);
-    refresh({ action: 'delete', type: tx.type, amount: tx.amount, date: tx.date });
+    await deleteTransaction(id);
+    window.dispatchEvent(new Event('stats-refresh'));
     onDeleted();
-  };
-
-  const handleSaved = (oldTx, newData) => {
-    refresh({ action: 'edit', type: newData.type, amount: parseFloat(newData.amount), date: newData.date, old: { type: oldTx.type, amount: oldTx.amount, date: oldTx.date } });
-    if (onEdited) onEdited();
   };
 
   if (!transactions.length) {
@@ -134,16 +129,10 @@ export default function TransactionTable({ transactions, onDeleted, onEdited }) 
               {t.type === 'income' ? '+' : '-'}
               {Number(t.amount).toLocaleString('uz-UZ')}
             </div>
-            <button
-              className="tx-edit"
-              onClick={() => setEditing(t)}
-            >
+            <button className="tx-edit" onClick={() => setEditing(t)}>
               Tahrir
             </button>
-            <button
-              className="tx-delete"
-              onClick={() => handleDelete(t)}
-            >
+            <button className="tx-delete" onClick={() => handleDelete(t._id || t.id)}>
               O'chir
             </button>
           </div>
@@ -154,7 +143,7 @@ export default function TransactionTable({ transactions, onDeleted, onEdited }) 
         <EditModal
           tx={editing}
           onClose={() => setEditing(null)}
-          onSaved={(oldTx, newData) => { handleSaved(oldTx, newData); setEditing(null); }}
+          onSaved={() => { if (onEdited) onEdited(); }}
         />
       )}
     </>
