@@ -1,12 +1,23 @@
 import { useState } from 'react';
 import { createTransaction } from '../services/api';
 
+function formatAmount(val) {
+  const digits = val.replace(/\D/g, '');
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
 export default function AddTransactionForm({ defaultDate, onAdded }) {
   const today = defaultDate || new Date().toISOString().split('T')[0];
   const [type, setType] = useState('income');
   const [form, setForm] = useState({ amount: '', description: '', date: today });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleAmountChange = (e) => {
+    setForm({ ...form, amount: formatAmount(e.target.value) });
+  };
+
+  const rawAmount = () => Number(form.amount.replace(/\s/g, ''));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,7 +28,7 @@ export default function AddTransactionForm({ defaultDate, onAdded }) {
     setError('');
     setLoading(true);
     try {
-      await createTransaction({ ...form, type });
+      await createTransaction({ ...form, amount: rawAmount(), type });
       setForm({ amount: '', description: '', date: today });
       window.dispatchEvent(new Event('stats-refresh'));
       onAdded();
@@ -54,12 +65,11 @@ export default function AddTransactionForm({ defaultDate, onAdded }) {
             <label>Miqdor (so'm)</label>
             <input
               className="form-control"
-              type="number"
+              type="text"
+              inputMode="numeric"
               placeholder="0"
               value={form.amount}
-              onChange={(e) => setForm({ ...form, amount: e.target.value })}
-              min="0"
-              inputMode="numeric"
+              onChange={handleAmountChange}
             />
           </div>
           <div className="form-group">

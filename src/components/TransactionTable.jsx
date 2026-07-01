@@ -1,15 +1,22 @@
 import { useState } from 'react';
 import { deleteTransaction, updateTransaction } from '../services/api';
 
+function formatAmount(val) {
+  const digits = String(val).replace(/\D/g, '');
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
 function EditModal({ tx, onClose, onSaved }) {
   const [type, setType] = useState(tx.type);
   const [form, setForm] = useState({
-    amount: tx.amount,
+    amount: formatAmount(tx.amount),
     description: tx.description,
     date: tx.date,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const rawAmount = () => Number(form.amount.replace(/\s/g, ''));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,7 +26,7 @@ function EditModal({ tx, onClose, onSaved }) {
     }
     setLoading(true);
     try {
-      await updateTransaction(tx._id || tx.id, { ...form, type });
+      await updateTransaction(tx._id || tx.id, { ...form, amount: rawAmount(), type });
       window.dispatchEvent(new Event('stats-refresh'));
       onSaved();
       onClose();
@@ -59,11 +66,10 @@ function EditModal({ tx, onClose, onSaved }) {
               <label>Miqdor (so'm)</label>
               <input
                 className="form-control"
-                type="number"
-                value={form.amount}
-                onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                min="0"
+                type="text"
                 inputMode="numeric"
+                value={form.amount}
+                onChange={(e) => setForm({ ...form, amount: formatAmount(e.target.value) })}
               />
             </div>
             <div className="form-group">
