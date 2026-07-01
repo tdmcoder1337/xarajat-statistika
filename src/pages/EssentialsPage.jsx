@@ -222,6 +222,7 @@ export default function EssentialsPage() {
           <div className="empty-state">Hali muhim xarajat qo'shilmagan</div>
         )}
 
+        <div style={{ maxHeight: 'calc(4 * 72px)', overflowY: 'auto' }}>
         {essentials.map((item) => {
           const itemId = item._id || item.id;
           const saveTime = getMonthsToSave(item.amount);
@@ -270,6 +271,7 @@ export default function EssentialsPage() {
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );
