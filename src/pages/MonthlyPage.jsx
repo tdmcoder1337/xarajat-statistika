@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getMonthlySummary, getTransactions } from '../services/api';
-import SummaryCard from '../components/SummaryCard';
 import TransactionTable from '../components/TransactionTable';
 import AddTransactionForm from '../components/AddTransactionForm';
 
@@ -48,12 +47,6 @@ export default function MonthlyPage() {
         <button onClick={prevMonth}>‹</button>
         <span>{MONTHS[month - 1]} {year}</span>
         <button onClick={nextMonth}>›</button>
-      </div>
-
-      <div className="grid-3">
-        <SummaryCard title="Jami Daromad" value={summary.income} type="income" icon="⬆" />
-        <SummaryCard title="Jami Xarajat" value={summary.expense} type="expense" icon="⬇" />
-        <SummaryCard title="Sof Foyda" value={summary.net} type="net" icon="💰" />
       </div>
 
       {/* Kunlik o'rtacha */}
