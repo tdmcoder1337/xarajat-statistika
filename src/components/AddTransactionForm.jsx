@@ -21,7 +21,7 @@ export default function AddTransactionForm({ defaultDate, onAdded }) {
     try {
       await createTransaction({ ...form, type });
       setForm({ amount: '', description: '', date: today });
-      refresh();
+      refresh({ action: 'add', type, amount: parseFloat(form.amount), date: form.date });
       onAdded();
     } catch (err) {
       setError(err.response?.data?.error || err.message || 'Saqlashda xatolik');
