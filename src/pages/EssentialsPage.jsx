@@ -20,16 +20,18 @@ export default function EssentialsPage() {
 
   const load = async () => {
     const now = new Date();
-    const [e, m] = await Promise.all([
-      getEssentials(),
-      getMonthlySummary(now.getMonth() + 1, now.getFullYear()),
-    ]);
-    setEssentials(e.data);
-    // Agar foydalanuvchi o'zi kiritmagan bo'lsa, haqiqiy oylik daromadni qo'yamiz
-    if (!monthlyIncome) {
-      const income = m.data.income || 0;
-      if (income > 0) setMonthlyIncome(formatAmount(String(income)));
-    }
+    // Ikkalasini alohida yuklaymiz — biri xato qilsa ikkinchisi ishlayveradi
+    getEssentials()
+      .then((e) => setEssentials(e.data))
+      .catch(() => {});
+    getMonthlySummary(now.getMonth() + 1, now.getFullYear())
+      .then((m) => {
+        if (!monthlyIncome) {
+          const income = m.data.income || 0;
+          if (income > 0) setMonthlyIncome(formatAmount(String(income)));
+        }
+      })
+      .catch(() => {});
   };
 
   useEffect(() => { load(); }, []);
